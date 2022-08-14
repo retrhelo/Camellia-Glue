@@ -7,21 +7,21 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw(
   load_module
   init_top push_top write_top
-  create_port add_port
+  create_bundle add_bundle
   );
 
 my $module = {};
 
 my $meta;
 my @elem_array = ();
-my @port_array = ();
+my @bundle_array = ();
 
 sub init_top {
   my ($args) = @_;
 
   # clear arrays
   @elem_array = ();
-  @port_array = ();
+  @bundle_array = ();
   # assign top module name
   $meta = {
     top => $args->{top},
@@ -38,10 +38,10 @@ sub push_top {
 sub write_top {
   open TARGET, ">", $meta->{file};
 
-  # generate top-level ports
+  # generate top-level bundles
   print TARGET "module $meta->{top} (";
   my $is_first = 1;
-  for my $elem (@port_array) {
+  for my $elem (@bundle_array) {
     if (defined $elem->{name}) {
       if (!$is_first) {
         print TARGET ",";
@@ -80,36 +80,34 @@ sub write_top {
   close TARGET;
 }
 
-use Camellia::Glue::Port;
+use Camellia::Glue::Bundle;
 
-# Provide an safer way to create Port object. It hides low-level implementation,
-# avoiding users using "Camellia::Glue::Port" directly.
-sub create_port {
+# Provide an safer way to create Bundle object. It hides low-level implementation,
+# avoiding users using "Camellia::Glue::Bundle" directly.
+sub create_bundle {
   my ($name, $group) = @_;
 
   # sanity check
   for my $port (@$group) {
-    defined $port->{name} or die "Port $name: undefined name";
-    defined $port->{direction} or die "Port $name: undefined direction";
-    die "Port $name: invalid direction \"$port->{direction}\"" if (
+    defined $port->{name} or die "Bundle $name: undefined name";
+    defined $port->{direction} or die "Bundle $name: undefined direction";
+    die "Bundle $name: invalid direction \"$port->{direction}\"" if (
       ("input" cmp $port->{direction}) &&
       ("output" cmp $port->{direction}) &&
       ("inout" cmp $port->{direction})
     );
-    defined $port->{width} or die "Port $name: undefined width";
+    defined $port->{width} or die "Bundle $name: undefined width";
     defined $port->{tag} or $port->{tag} = $port->{name};
   }
 
-  return Camellia::Glue::Port->new({
+  return Camellia::Glue::Bundle->new({
     name => $name,
     group => $group
   });
 }
 
-sub add_port {
-  for my $port (@_) {
-    push @port_array, $port;
-  }
+sub add_bundle {
+  push @bundle_array, @_;
 }
 
 use JSON::PP;

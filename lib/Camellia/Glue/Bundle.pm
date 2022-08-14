@@ -1,12 +1,11 @@
 use strict;
 use warnings;
-package Camellia::Glue::Port;
+package Camellia::Glue::Bundle;
 
 sub new {
   my ($class, $args) = @_;
 
   return bless {
-    connected => 0,
     group => $args->{group},
     name => $args->{name}
   }, $class;

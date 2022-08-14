@@ -12,13 +12,13 @@ use Camellia::Glue;
 init_top {top => "test", file => "test.v"};
 
 # Add top-level ports
-my $clk = create_port "clock", [
+my $clk = create_bundle "clock", [
   {name => "clk", direction => "input", width => 1}
 ];
-my $reset = create_port "reset", [
+my $reset = create_bundle "reset", [
   {name => "rst_n", direction => "input", width => 1}
 ];
-my $data = create_port "data", [
+my $data = create_bundle "data", [
   {name => "d", direction => "input", width => 64},
   {name => "q", direction => "output", width => 64}
 ];
@@ -26,7 +26,7 @@ my $data = create_port "data", [
 # Currently, assign q with a register reg_q, which is defined in raw code.
 $data->except("q", "reg_q");
 
-add_port $clk, $reset, $data;
+add_bundle $clk, $reset, $data;
 
 # TODO add rawcode that generates reg_q
 

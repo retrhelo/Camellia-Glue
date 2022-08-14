@@ -7,7 +7,7 @@ use Test::Simple tests => 6;
 
 use Camellia::Glue;
 
-my $master = create_port "master", [
+my $master = create_bundle "master", [
   {
     name => "port1",
     direction => "input",
@@ -34,7 +34,7 @@ my $master = create_port "master", [
   }
 ];
 
-my $slave = create_port "slave", [
+my $slave = create_bundle "slave", [
   {
     name => "port_default_tag",
     direction => "output",
