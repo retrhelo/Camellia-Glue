@@ -7,7 +7,6 @@ sub new {
 
   return bless {
     connected => 0,
-    source => 0,
     group => $args->{group},
     name => $args->{name}
   }, $class;
@@ -20,24 +19,36 @@ sub new {
 # width: width of port
 # tag: tag of this port, used for comparison when connecting with another port
 # wire: the name of wire used to connect this port
-# gen: should the wire the a generated one
+# gen: if the wire is auto generated
 
 sub connect {
-  my ($obj, $args) = @_;
+  my ($obj, $dst_obj, $args) = @_;
 
-  my $prefix = (defined $args->{prefix}) ? "$args->{prefix}_" : "";
-  my $suffix = (defined $args->{suffix}) ? "$args->{suffix}_" : "";
+  my ($prefix, $suffix);
+  if (defined $args) {
+    $prefix = (defined $args->{prefix}) ? "$args->{prefix}_" : "";
+    $suffix = (defined $args->{suffix}) ? "_$args->{suffix}" : "";
+  }
 
-  $obj->{connected} = $args->{dst}->{connected} = 1;
-  $obj->source = 1;
-
-  # TODO: optimize the searching algorithm
   for my $src (@{$obj->{group}}) {
-    for my $dst (@{$args->{dst}->{group}}) {
+    for my $dst (@{$dst_obj->{group}}) {
+      # if the tags match
       if (0 == ($src->{tag} cmp $dst->{tag})) {
-        $src->{wire} = $dst->{wire} = "${prefix}$src->{tag}${suffix}";
-        # only mark src's port as "generated", to avoid generating twice
-        $src->{gen} = 1;
+        if (0 == ($src->{direction} cmp $dst->{direction}) &&
+            $src->{direction} cmp "inout")
+        {
+          warn "$obj->{name}::$src->{name} -> $dst_obj->{name}::$dst->{name}: "
+              . "same direction";
+        } elsif ($src->{width} != $dst->{width}) {
+          warn "$obj->{name}::$src->{name} -> $dst_obj->{name}::$dst->{name}: "
+              . "unmatched width ($src->{width}, $dst->{width})";
+        } else {
+          # create the connection
+          $src->{wire} = $dst->{wire} = "$prefix$src->{tag}$suffix";
+          # only mark source port as "generated"
+          $src->{gen} = 1;
+        }
+        last;
       }
     }
   }
@@ -45,7 +56,7 @@ sub connect {
   return $obj;
 }
 
-# Handle excepting ports
+# Assign connection manually
 sub except {
   my ($obj, $port_name, $wire) = @_;
   for my $src (@{$obj->{group}}) {

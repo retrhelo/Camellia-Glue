@@ -50,10 +50,6 @@ sub write_top {
       print TARGET "\n  // $elem->{name}";
     }
     for my $port (@{$elem->{group}}) {
-      # Connection check
-      ((0 == ("input" cmp $port->{direction})) || (defined $port->{wire})) or
-          die "Port $port->{name}: not connected";
-
       if ($is_first) {
         print TARGET "\n  ";
         $is_first = 0;
@@ -76,6 +72,8 @@ sub write_top {
   # TODO: init all wires
 
   # TODO: init all module instances
+
+  # TODO: generate assign statements for top-level ports
 
   print TARGET "endmodule\n";
 
