@@ -11,7 +11,7 @@ use Camellia::Glue;
 
 # First initialize a top-level module.
 my $gen_file = "gen_rawcode.v";
-init_top {top => "gen_rawcode", file => $gen_file};
+init_top "gen_rawcode", $gen_file;
 
 # Add top-level ports
 my $timing = create_bundle "timing", [

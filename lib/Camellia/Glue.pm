@@ -18,15 +18,15 @@ my @elem_array = ();
 my @bundle_array = ();
 
 sub init_top {
-  my ($args) = @_;
+  my ($top, $file) = @_;
 
   # clear arrays
   @elem_array = ();
   @bundle_array = ();
   # assign top module name
   $meta = {
-    top => $args->{top},
-    file => $args->{file}
+    top => $top,
+    file => $file
   };
 }
 
