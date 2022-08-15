@@ -8,6 +8,7 @@ our @EXPORT = qw(
   load_module
   init_top push_top write_top
   create_bundle add_bundle
+  create_raw
   );
 
 my $module = {};
@@ -72,8 +73,45 @@ sub write_top {
   # TODO: init all wires
 
   # TODO: init all module instances
+  for my $elem (@elem_array) {
+    if ($elem->isa("Camellia::Glue::Rawcode")) {
+      print TARGET "$elem->{code}\n";
+    }
+    # TODO: module instance generation
+  }
 
-  # TODO: generate assign statements for top-level ports
+  for my $bundle (@bundle_array) {
+    # All timing related signals, like clock and reset, are not involved
+    ((defined $bundle->{name}) && 0 == ("timing" cmp $bundle->{name}))
+        and next;
+
+    my $str_buf = "";
+    for my $port (@{$bundle->{group}}) {
+      # connection check
+      if (!(defined $port->{wire})) {
+        ("output" cmp $port->{direction}) or die "$port->{name}: "
+            . "undriven output port";
+        warn "$port->{name}: not used";
+      }
+
+      if ($port->{gen}) {
+        if (0 == ("output" cmp $port->{direction})) {
+          $str_buf .= "assign $port->{name} = $port->{wire};\n";
+        } elsif (0 == ("input" cmp $port->{direction})) {
+          $str_buf .= "assign $port->{wire} = $port->{name};\n";
+        } else {
+          warn "$port->{name}: inout connection not generated";
+        }
+      }
+    }
+
+    if ($str_buf) {
+      if (defined $bundle->{name}) {
+        print TARGET "// $bundle->{name}\n";
+      }
+      print TARGET "$str_buf\n";
+    }
+  }
 
   print TARGET "endmodule\n";
 
@@ -116,6 +154,8 @@ use JSON::PP;
 sub load_module {
   my ($path, $name) = @_;
 
+  (defined $module->{$name}) and die "Multi-load of module \"$name\"";
+
   open MODULE_FILE, "<$path" or die "Fail to open $path";   # open JSON file
   my $content;
   while (<MODULE_FILE>) {
@@ -124,6 +164,15 @@ sub load_module {
   close MODULE_FILE;  # close JSON file
 
   $module->{$name} = decode_json $content;
+}
+
+use Camellia::Glue::Rawcode;
+
+sub create_raw {
+  my ($code) = @_;
+  return Camellia::Glue::Rawcode->new({
+    code => $code
+  });
 }
 
 1;

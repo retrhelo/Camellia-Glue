@@ -12,10 +12,8 @@ use Camellia::Glue;
 init_top {top => "test", file => "test.v"};
 
 # Add top-level ports
-my $clk = create_bundle "clock", [
-  {name => "clk", direction => "input", width => 1}
-];
-my $reset = create_bundle "reset", [
+my $timing = create_bundle "timing", [
+  {name => "clk", direction => "input", width => 1},
   {name => "rst_n", direction => "input", width => 1}
 ];
 my $data = create_bundle "data", [
@@ -23,12 +21,26 @@ my $data = create_bundle "data", [
   {name => "q", direction => "output", width => 64}
 ];
 
-# Currently, assign q with a register reg_q, which is defined in raw code.
+# except() will not get signal generated, but they're still necessary for
+# connection check. Make sure that every port is connected, especially for
+# output ones.
+$data->except("d", "reg_q");
 $data->except("q", "reg_q");
 
-add_bundle $clk, $reset, $data;
+add_bundle $timing, $data;
 
-# TODO add rawcode that generates reg_q
+# Raw Verilog code that defines timing logic
+my $rawcode = create_raw <<EOL;
+reg [63:0] reg_q;
+
+always @(posedge clk or negedge rst_n) begin
+  if (!rst_n) reg_q <= 64'd0;
+  else reg_q <= d;
+end
+
+assign q = reg_q;
+EOL
+push_top $rawcode;
 
 # TODO: create and connect instances
 
