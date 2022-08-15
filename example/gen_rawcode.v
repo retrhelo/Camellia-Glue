@@ -1,4 +1,4 @@
-module test (
+module gen_rawcode (
   // timing
   input clk,
   input rst_n,

@@ -1,4 +1,5 @@
 # This test demonstrate a simple use case of Camellia::Glue.
+# Top-level ports are declared, and connected to a raw code snippet.
 
 use strict;
 use warnings;
@@ -9,7 +10,8 @@ use File::Compare;
 use Camellia::Glue;
 
 # First initialize a top-level module.
-init_top {top => "test", file => "test.v"};
+my $gen_file = "gen_rawcode.v";
+init_top {top => "gen_rawcode", file => $gen_file};
 
 # Add top-level ports
 my $timing = create_bundle "timing", [
@@ -42,13 +44,11 @@ assign q = reg_q;
 EOL
 push_top $rawcode;
 
-# TODO: create and connect instances
-
 # Finally, write it to a given file.
 write_top;
 
 # Compare if the generated file is wanted
-ok(0 == (compare "test.v", "example/test.v"));
+ok(0 == (compare $gen_file, "example/$gen_file"));
 
 # Remove generated file
-ok(unlink "test.v");
+ok(unlink $gen_file);
