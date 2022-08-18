@@ -29,7 +29,8 @@ my $data = create_bundle "data", [
 $data->except("d", "reg_q");
 $data->except("q", "reg_q");
 
-add_bundle $timing, $data;
+# add_bundle $timing, $data;
+sign $timing, $data;
 
 # Raw Verilog code that defines timing logic
 my $rawcode = create_raw <<EOL;
@@ -42,7 +43,8 @@ end
 
 assign q = reg_q;
 EOL
-push_top $rawcode;
+
+sign $rawcode;
 
 # Finally, write it to a given file.
 write_top;

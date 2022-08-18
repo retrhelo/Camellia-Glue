@@ -6,23 +6,22 @@ require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(
   load_module
-  init_top push_top write_top
-  create_bundle add_bundle
-  create_raw
+  init_top write_top sign
+  create_bundle create_raw
   );
 
 my $module = {};
 
 my $meta;
-my @elem_array = ();
-my @bundle_array = ();
+
+my ($port_buf, $assign_buf);
+my ($wire_buf, $elem_buf);
 
 sub init_top {
   my ($top, $file) = @_;
 
   # clear arrays
-  @elem_array = ();
-  @bundle_array = ();
+  $port_buf = $assign_buf = $wire_buf = $elem_buf = "";
   # assign top module name
   $meta = {
     top => $top,
@@ -30,98 +29,67 @@ sub init_top {
   };
 }
 
-sub push_top {
-  for my $elem (@_) {
-    push @elem_array, $elem;
-  }
-}
-
 sub write_top {
   open TARGET, ">", $meta->{file};
 
-  # generate top-level bundles
-  print TARGET "module $meta->{top} (";
-  my $is_first = 1;
-  for my $elem (@bundle_array) {
-    if (defined $elem->{name}) {
-      if (!$is_first) {
-        print TARGET ",";
-        $is_first = 1;
-      }
-      print TARGET "\n  // $elem->{name}";
-    }
-    for my $port (@{$elem->{group}}) {
-      if ($is_first) {
-        print TARGET "\n  ";
-        $is_first = 0;
-      } else {
-        print TARGET ",\n  ";
-      }
-      # direction
-      print TARGET "$port->{direction} ";
-      # width
-      if ($port->{width} > 1) {
-        my $width = $port->{width} - 1;
-        print TARGET "[${width}:0] ";
-      }
-      # port name
-      print TARGET "$port->{name}";
-    }
-  }
-  print TARGET "\n);\n\n";
-
-  # TODO: init all wires
-
-  # TODO: init all module instances
-  for my $elem (@elem_array) {
-    if ($elem->isa("Camellia::Glue::Rawcode")) {
-      print TARGET "$elem->{code}\n";
-    }
-    # TODO: module instance generation
-  }
-
-  for my $bundle (@bundle_array) {
-    # All timing related signals, like clock and reset, are not involved
-    ((defined $bundle->{name}) && 0 == ("timing" cmp $bundle->{name}))
-        and next;
-
-    my $str_buf = "";
-    for my $port (@{$bundle->{group}}) {
-      # connection check
-      if (!(defined $port->{wire})) {
-        ("output" cmp $port->{direction}) or die "$port->{name}: "
-            . "undriven output port";
-        warn "$port->{name}: not used";
-      }
-
-      if ($port->{gen}) {
-        if (0 == ("output" cmp $port->{direction})) {
-          $str_buf .= "assign $port->{name} = $port->{wire};\n";
-        } elsif (0 == ("input" cmp $port->{direction})) {
-          $str_buf .= "assign $port->{wire} = $port->{name};\n";
-        } else {
-          warn "$port->{name}: inout connection not generated";
-        }
-      }
-    }
-
-    if ($str_buf) {
-      if (defined $bundle->{name}) {
-        print TARGET "// $bundle->{name}\n";
-      }
-      print TARGET "$str_buf\n";
-    }
-  }
-
+  print TARGET "module $meta->{top} ($port_buf\n);\n";
+  # print TARGET "$wire_buf\n$elem_buf\n$assign_buf\n";
+  print TARGET "$wire_buf\n" if ($wire_buf);
+  print TARGET "$elem_buf\n" if ($elem_buf);
+  print TARGET "$assign_buf\n" if ($assign_buf);
   print TARGET "endmodule\n";
 
   close TARGET;
 }
 
+sub sign {
+  for my $elem (@_) {
+    if ($elem->isa("Camellia::Glue::Bundle")) {
+      my $first_port = 1;
+      for my $port (@{$elem->{group}}) {
+        $port_buf .= "," if ($port_buf);
+        if ($first_port) {
+          $port_buf .= (defined $elem->{name}) ? "\n  // $elem->{name}" : "\n";
+          $first_port = 0;
+        }
+        $port_buf .= "\n  $port->{direction} ";
+        my $width = $port->{width} - 1;
+        $port_buf .= "[$width:0] " if ($port->{width} > 1);
+        $port_buf .= $port->{name};
+      }
+
+      ((defined $elem->{name}) && (0 == ("timing" cmp $elem->{name})))
+        and next;
+
+      $elem->check();
+
+      for my $port (@{$elem->{group}}) {
+        # if ($first_port) {
+        #   $assign_buf .= (defined $elem->{name}) ? "// $elem->{name}\n" : "\n";
+        #   $first_port = 0;
+        # }
+        # $assign_buf .= "assign ";
+        # if (0 == ("input" cmp $port->{direction})) {
+        #   $assign_buf .= "$port->{wire} = $port->{name};\n";
+        # } elsif (0 == ("output" cmp $port->{direction})) {
+        #   $assign_buf .= "$port->{name} = $port->{wire};\n";
+        # } else {
+        #   warn "Direction inout not supported";
+        # }
+      }
+    } elsif ($elem->isa("Camellia::Glue::Rawcode")) {
+      $elem_buf .= "\n$elem->{code}";
+    } elsif ($elem->isa("Camellia::Glue::Inst")) {
+      # TODO: implement this
+      die "Not implemented";
+    }
+  }
+}
+
 use Camellia::Glue::Bundle;
 
-# Provide an safer way to create Bundle object. It hides low-level implementation,
-# avoiding users using "Camellia::Glue::Bundle" directly.
+# Provide an safer way to create Bundle object. It hides low-level
+# implementation, avoiding users using "Camellia::Glue::Bundle" directly.
 sub create_bundle {
   my ($name, $group) = @_;
 
@@ -142,10 +110,6 @@ sub create_bundle {
     name => $name,
     group => $group
   });
-}
-
-sub add_bundle {
-  push @bundle_array, @_;
 }
 
 use JSON::PP;

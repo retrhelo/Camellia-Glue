@@ -68,4 +68,17 @@ sub except {
   return $obj;
 }
 
+# Connection check for bundle
+sub check {
+  my ($obj) = @_;
+
+  for my $port (@{$obj->{group}}) {
+    if (!(defined $port->{wire})) {
+      ("output" cmp $port->{direction}) or die "$port->{name}: "
+          . "undriven input port";
+      warn "$port->{name}: output not used";
+    }
+  }
+}
+
 1;
