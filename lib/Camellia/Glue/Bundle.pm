@@ -41,10 +41,20 @@ sub connect {
           warn "$obj->{name}::$src->{name} -> $dst_obj->{name}::$dst->{name}: "
               . "unmatched width ($src->{width}, $dst->{width})";
         } else {
-          # create the connection
-          $src->{wire} = $dst->{wire} = "$prefix$src->{tag}$suffix";
-          # only mark source port as "generated"
-          $src->{gen} = 1;
+          my ($port_out, $port_in);
+          if (0 == ("output" cmp $src->{direction})) {
+            $port_out = $src;
+            $port_in = $dst;
+          } else {
+            $port_out = $dst;
+            $port_in = $src;
+          }
+
+          if (!(defined $port_out->{wire})) {
+            $port_out->{wire} = "$prefix$port_out->{tag}$suffix";
+            $port_out->{gen} = 1;
+          }
+          $port_in->{wire} = $port_out->{wire};
         }
         last;
       }
