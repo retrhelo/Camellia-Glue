@@ -2,8 +2,9 @@ module gen_rawcode (
   // timing
   input clk,
   input rst_n,
-  // data
+  // data_in
   input [63:0] d,
+
   output [63:0] q
 );
 
