@@ -64,18 +64,7 @@ sub sign {
       $elem->check();
 
       for my $port (@{$elem->{group}}) {
-        # if ($first_port) {
-        #   $assign_buf .= (defined $elem->{name}) ? "// $elem->{name}\n" : "\n";
-        #   $first_port = 0;
-        # }
-        # $assign_buf .= "assign ";
-        # if (0 == ("input" cmp $port->{direction})) {
-        #   $assign_buf .= "$port->{wire} = $port->{name};\n";
-        # } elsif (0 == ("output" cmp $port->{direction})) {
-        #   $assign_buf .= "$port->{name} = $port->{wire};\n";
-        # } else {
-        #   warn "Direction inout not supported";
-        # }
+        # TODO: implement this
       }
     } elsif ($elem->isa("Camellia::Glue::Rawcode")) {
       $elem_buf .= "\n$elem->{code}";
@@ -99,8 +88,7 @@ sub create_bundle {
     defined $port->{direction} or die "Bundle $name: undefined direction";
     die "Bundle $name: invalid direction \"$port->{direction}\"" if (
       ("input" cmp $port->{direction}) &&
-      ("output" cmp $port->{direction}) &&
-      ("inout" cmp $port->{direction})
+      ("output" cmp $port->{direction})
     );
     defined $port->{width} or die "Bundle $name: undefined width";
     defined $port->{tag} or $port->{tag} = $port->{name};

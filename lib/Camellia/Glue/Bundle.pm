@@ -14,7 +14,7 @@ sub new {
 # each element in "group" stands for a single port, and consists of following
 # fields:
 # name: the name of the port
-# direction: the direction of "input", "output" or "inout"
+# direction: the direction of "input" or "output"
 # width: width of port
 # tag: tag of this port, used for comparison when connecting with another port
 # wire: the name of wire used to connect this port
@@ -33,8 +33,7 @@ sub connect {
     for my $dst (@{$dst_obj->{group}}) {
       # if the tags match
       if (0 == ($src->{tag} cmp $dst->{tag})) {
-        if (0 == ($src->{direction} cmp $dst->{direction}) &&
-            $src->{direction} cmp "inout")
+        if (0 == ($src->{direction} cmp $dst->{direction}))
         {
           warn "$obj->{name}::$src->{name} -> $dst_obj->{name}::$dst->{name}: "
               . "same direction";
