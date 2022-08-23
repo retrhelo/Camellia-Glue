@@ -7,7 +7,8 @@ sub new {
 
   return bless {
     group => $args->{group},
-    name => $args->{name}
+    name => $args->{name},
+    debug => $args->{debug}
   }, $class;
 }
 

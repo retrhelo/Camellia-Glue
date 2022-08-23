@@ -43,13 +43,15 @@ sub write_top {
 }
 
 sub sign {
+  my ($package, $filename, $line) = caller;
+
   for my $elem (@_) {
     if ($elem->isa("Camellia::Glue::Bundle")) {
       my $first_port = 1;
       for my $port (@{$elem->{group}}) {
         $port_buf .= "," if ($port_buf);
         if ($first_port) {
-          $port_buf .= (defined $elem->{name}) ? "\n  // $elem->{name}" : "\n";
+          $port_buf .= "\n  // $elem->{name} $elem->{debug}";
           $first_port = 0;
         }
         $port_buf .= "\n  $port->{direction} ";
@@ -75,12 +77,14 @@ sub sign {
   }
 }
 
+use File::Basename;
 use Camellia::Glue::Bundle;
 
 # Provide an safer way to create Bundle object. It hides low-level
 # implementation, avoiding users using "Camellia::Glue::Bundle" directly.
 sub create_bundle {
   my ($name, $group) = @_;
+  $name //= "";
 
   # sanity check
   for my $port (@$group) {
@@ -94,9 +98,11 @@ sub create_bundle {
     defined $port->{tag} or $port->{tag} = $port->{name};
   }
 
+  my ($package, $filename, $line) = caller;
   return Camellia::Glue::Bundle->new({
     name => $name,
-    group => $group
+    group => $group,
+    debug => "&" . basename($filename) . "; \@$line"
   });
 }
 
