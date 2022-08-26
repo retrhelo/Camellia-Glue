@@ -1,0 +1,17 @@
+{
+  "name": "minus1",
+  "bundle": [
+    {
+      "name": "data_in",
+      "group": [
+        {"name": "din", "width": 32, "direction": "input", "tag": "data"}
+      ]
+    },
+    {
+      "name": "data_out",
+      "group": [
+        {"name": "dout", "width": 32, "direction": "output", "tag": "data"}
+      ]
+    }
+  ]
+}
