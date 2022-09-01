@@ -33,11 +33,11 @@ my $adder2 = create_inst "add1", "adder";
 my $minus = create_inst "minus1";
 
 # Connect modules and top-level ports
-$data_in->connect($adder1->get("data_in"));
+$data_in->connect($adder1->get_bundle("data_in"));
 # Assign prefix explicitly
-$adder1->get("data_out")->connect($adder2->get("data_in"), {prefix => "tmp"});
-$adder2->get("data_out")->connect($minus->get("data_in"));
-$minus->get("data_out")->connect($data_out);
+$adder1->get_bundle("data_out")->connect($adder2->get_bundle("data_in"), {prefix => "tmp"});
+$adder2->get_bundle("data_out")->connect($minus->get_bundle("data_in"));
+$minus->get_bundle("data_out")->connect($data_out);
 
 sign $data_in, $data_out;
 sign $adder1, $adder2, $minus;

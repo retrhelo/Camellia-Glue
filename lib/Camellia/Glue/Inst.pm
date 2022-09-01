@@ -3,6 +3,7 @@ use warnings;
 package Camellia::Glue::Inst;
 
 use Camellia::Glue::Bundle;
+use Camellia::Glue::Timing;
 
 use constant {
   DATA_SRC => 0x1,
@@ -12,16 +13,35 @@ use constant {
 sub new {
   my ($class, $args) = @_;
 
-  my $name = $args->{name};           # Instance's name
-  my $mod_name = $args->{mod_name};   # Module's name
-  my $config = $args->{config};       # Module's bundles (and parameters)
-  my $debug = $args->{debug};         # Debug information
-
-  # TODO: support default timing domain
+  my $name = $args->{name};             # Instance's name
+  my $mod_name = $args->{mod_name};     # Module's name
+  my $config = $args->{config};         # Module's bundles (and parameters)
+  my $default_timing = $args->{timing}; # Default timing domain
+  my $debug = $args->{debug};           # Debug information
 
   # TODO: support parameters
 
   # Deep copy all configurations from `config`
+
+  my $timing_array = [];
+  for my $timing (@{$config->{timing}}) {
+    my $tmp_timing = Camellia::Glue::Timing->new({
+      name => $timing->{name},
+      clock => {
+        name => $timing->{clock}->{name}
+      },
+      reset => {
+        name => $timing->{reset}->{name},
+        edge => $timing->{reset}->{edge}
+      },
+      debug => $debug
+    });
+
+    defined $default_timing and $tmp_timing->set_timing($default_timing);
+
+    push @$timing_array, $tmp_timing;
+  }
+
   my $bundle_array = [];
   for my $bundle (@{$config->{bundle}}) {
     defined $bundle->{name} or die "$debug: Bundle name not defined";
@@ -48,13 +68,14 @@ sub new {
   return bless {
     name => $name,
     mod_name => $mod_name,
+    timing => $timing_array,
     bundle => $bundle_array,
     debug => $debug
   }, $class;
 }
 
 # Get bundle of the given name
-sub get {
+sub get_bundle {
   my ($objref, $name) = @_;
 
   for my $bundle (@{$objref->{bundle}}) {
@@ -66,11 +87,28 @@ sub get {
   die "Bundle \"$name\" not found";
 }
 
+# Get timing of the given name
+sub get_timing {
+  my ($objref, $name) = @_;
+
+  for my $timing (@{$objref->{timing}}) {
+    if (0 == ($name cmp $timing->{name})) {
+      return $timing;
+    }
+  }
+
+  die "Timing \"$name\" not found";
+}
+
 # Be noticed! Connection check for each bundle should be performed before
 # generating any wires or the instance itself.
 
 sub check {
   my ($objref) = @_;
+
+  for my $timing (@{$objref->{timing}}) {
+    $timing->check();
+  }
 
   for my $bundle (@{$objref->{bundle}}) {
     $bundle->check();
@@ -102,6 +140,19 @@ sub gen_inst {
   # TODO: parameter support
   $ret .= "\n// $objref->{debug}\n";
   $ret .= "$objref->{mod_name} $objref->{name} (";
+  # Generate timing ports first
+  for my $timing (@{$objref->{timing}}) {
+    if ($is_first) {
+      $ret .= "\n";
+      $is_first = 0;
+    } else {
+      $ret .= ",\n";
+    }
+
+    $ret .= "  .$timing->{clock}->{name}($timing->{clock}->{wire}),\n";
+    $ret .= "  .$timing->{reset}->{name}($timing->{reset}->{wire})";
+  }
+  # Then normal bundles
   for my $bundle (@{$objref->{bundle}}) {
     for my $port (@{$bundle->{group}}) {
       if ($is_first) {

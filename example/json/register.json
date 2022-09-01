@@ -1,0 +1,24 @@
+{
+  "name": "register",
+  "timing": [
+    {
+      "name": "default",
+      "clock": {"name": "clk"},
+      "reset": {"name": "rst_n", "edge": "neg"}
+    }
+  ],
+  "bundle": [
+    {
+      "name": "data_in",
+      "group": [
+        {"name": "d", "width": 32, "direction": "input", "tag": "data"}
+      ]
+    },
+    {
+      "name": "data_out",
+      "group": [
+        {"name": "q", "width": 32, "direction": "output", "tag": "data"}
+      ]
+    }
+  ]
+}

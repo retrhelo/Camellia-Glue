@@ -7,6 +7,7 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw(
   load_module
   init_top write_top sign
+  create_timing enter_timing
   create_bundle create_raw create_inst
   );
 
@@ -72,6 +73,8 @@ sub sign {
 
       $wire_buf .= $elem->gen_wire();
       $elem_buf .= $elem->gen_inst();
+    } elsif ($elem->isa("Camellia::Glue::Timing")) {
+      $port_buf .= $elem->gen_port(0 == ("" cmp $port_buf));
     } else {
       my ($package, $filename, $line) = caller;
       die "&$filename \@$line: Unknown type signed";
@@ -80,7 +83,26 @@ sub sign {
 }
 
 use File::Basename;
+use Camellia::Glue::Timing;
 use Camellia::Glue::Bundle;
+
+sub create_timing {
+  my ($name, $args) = @_;
+  $name //= "";
+
+  my ($package, $filename, $line) = caller;
+  return Camellia::Glue::Timing->new({
+    name => $name,
+    clock => {name => $args->{clock}},
+    reset => {name => $args->{reset}, edge => $args->{edge}},
+    debug => "&" . basename($filename) . "; \@$line"
+  });
+}
+
+sub enter_timing {
+  my ($timing) = @_;
+  $meta->{timing} = $timing;
+}
 
 # Provide an safer way to create Bundle object. It hides low-level
 # implementation, avoiding users using "Camellia::Glue::Bundle" directly.
@@ -139,10 +161,12 @@ sub create_inst {
   # Add the counter
   $config->{count} = (defined $config->{count}) ? $config->{count} + 1 : 0;
 
+  # TODO: assign default timing
   return Camellia::Glue::Inst->new({
     name => $name // "u$config->{count}_$mod_name",
     mod_name => $mod_name,
     config => $config,
+    timing => $meta->{timing},
     debug => "&" . basename($filename) . "; \@$line"
   });
 }
