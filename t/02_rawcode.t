@@ -24,13 +24,9 @@ my $data_out = create_bundle undef, [
 $data_in->except("d", "temp");
 $data_out->except("q", "temp");
 
-sign $data_in, $data_out;
-
 my $rawcode = create_raw <<EOL;
 assign q = d + 1;
 EOL
-
-sign $rawcode;
 
 # Finally, write it to a given file
 write_top;

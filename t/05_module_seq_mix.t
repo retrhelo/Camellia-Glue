@@ -50,8 +50,6 @@ $add->get_bundle("data_in")->connect($data_in);
 $add->get_bundle("data_out")->connect($reg_add->get_bundle("data_in"));
 $reg_add->get_bundle("data_out")->connect($data_add);
 
-sign $add, $reg_add;
-
 my $minus = create_inst "minus1";
 my $reg_minus = create_inst "register";
 
@@ -61,11 +59,6 @@ $reg_minus->get_bundle("data_out")->connect($data_minus);
 
 # Assign timing domain manually
 $reg_minus->get_timing("default")->set_timing($fast_timing);
-
-sign $minus, $reg_minus;
-
-sign $slow_timing, $fast_timing;
-sign $data_in, $data_add, $data_minus;
 
 write_top;
 

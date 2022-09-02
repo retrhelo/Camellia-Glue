@@ -9,7 +9,7 @@ module gen_rawcode (
   output [63:0] q
 );
 
-// &02_rawcode.t; @29
+// &02_rawcode.t; @27
 assign q = d + 1;
 
 // data_in &02_rawcode.t; @17

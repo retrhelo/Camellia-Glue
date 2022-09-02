@@ -39,9 +39,6 @@ $adder1->get_bundle("data_out")->connect($adder2->get_bundle("data_in"), {prefix
 $adder2->get_bundle("data_out")->connect($minus->get_bundle("data_in"));
 $minus->get_bundle("data_out")->connect($data_out);
 
-sign $data_in, $data_out;
-sign $adder1, $adder2, $minus;
-
 write_top;
 
 # Compare if the generated file is wanted

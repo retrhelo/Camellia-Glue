@@ -23,9 +23,9 @@ module gen_module_seq_mix (
 wire [31:0] data_845239;
 // &05_module_seq_mix.t; @47
 wire [31:0] data_7808ca;
-// &05_module_seq_mix.t; @55
+// &05_module_seq_mix.t; @53
 wire [31:0] data_ecdae7;
-// &05_module_seq_mix.t; @56
+// &05_module_seq_mix.t; @54
 wire [31:0] data_82ddc2;
 
 
@@ -43,13 +43,13 @@ register u0_register (
   .q(data_7808ca)
 );
 
-// &05_module_seq_mix.t; @55
+// &05_module_seq_mix.t; @53
 minus1 u0_minus1 (
   .din(data_5b9468),
   .dout(data_ecdae7)
 );
 
-// &05_module_seq_mix.t; @56
+// &05_module_seq_mix.t; @54
 register u1_register (
   .clk(clk_fast),
   .rst_n(rst_n_fast),

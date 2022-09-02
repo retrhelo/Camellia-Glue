@@ -44,16 +44,11 @@ my $reg = create_inst "register";
 $data_in->connect($reg->get_bundle("data_in"));
 $reg->get_bundle("data_out")->connect($data_out1);
 
-sign $default_timing, $data_in, $data_out1;
-sign $reg;
-
 enter_timing $fast_timing;
 
 my $reg2 = create_inst "register";
 $data_in->connect($reg2->get_bundle("data_in"));
 $reg2->get_bundle("data_out")->connect($data_out2);
-
-sign $fast_timing, $reg2, $data_out2;
 
 write_top;
 
