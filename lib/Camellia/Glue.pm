@@ -161,7 +161,7 @@ sub create_raw {
 }
 
 sub create_inst {
-  my ($mod_name, $name) = @_;
+  my ($mod_name, $name, $con_bundle, $param) = @_;
   my ($package, $filename, $line) = caller;
 
   my $config = $module->{$mod_name};
@@ -177,6 +177,15 @@ sub create_inst {
     timing => $meta->{timing},
     debug => "&" . basename($filename) . "; \@$line"
   });
+
+  # `con_bundle` binds instance's bundles with existing bundles
+  if (defined $con_bundle) {
+    for my $bundle_name (keys %$con_bundle) {
+      $ret->get_bundle($bundle_name)->connect($con_bundle->{$bundle_name});
+    }
+  }
+
+  # TODO: Initialize parameters
 
   push @{$meta->{elem_array}}, $ret;
   return $ret;

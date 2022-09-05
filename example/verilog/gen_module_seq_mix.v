@@ -25,7 +25,7 @@ wire [31:0] data_845239;
 wire [31:0] data_7808ca;
 // &05_module_seq_mix.t; @53
 wire [31:0] data_ecdae7;
-// &05_module_seq_mix.t; @54
+// &05_module_seq_mix.t; @57
 wire [31:0] data_82ddc2;
 
 
@@ -49,7 +49,7 @@ minus1 u0_minus1 (
   .dout(data_ecdae7)
 );
 
-// &05_module_seq_mix.t; @54
+// &05_module_seq_mix.t; @57
 register u1_register (
   .clk(clk_fast),
   .rst_n(rst_n_fast),
