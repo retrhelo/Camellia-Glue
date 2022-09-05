@@ -116,9 +116,10 @@ sub check {
 }
 
 sub gen_wire {
-  my ($objref) = @_;
+  my ($objref, $is_debug) = @_;
+  my $ret = "";
 
-  my $ret = "// $objref->{debug}\n";
+  $ret .= "// $objref->{debug}\n" if ($is_debug);
   for my $bundle (@{$objref->{bundle}}) {
     for my $port (@{$bundle->{group}}) {
       if ($port->{gen}) {
@@ -133,13 +134,13 @@ sub gen_wire {
 }
 
 sub gen_inst {
-  my ($objref) = @_;
+  my ($objref, $is_debug) = @_;
   my $ret = "";
   my $is_first = 1;
 
   # TODO: parameter support
-  $ret .= "\n// $objref->{debug}\n";
-  $ret .= "$objref->{mod_name} $objref->{name} (";
+  $ret .= "\n// $objref->{debug}" if ($is_debug);
+  $ret .= "\n$objref->{mod_name} $objref->{name} (";
   # Generate timing ports first
   for my $timing (@{$objref->{timing}}) {
     if ($is_first) {

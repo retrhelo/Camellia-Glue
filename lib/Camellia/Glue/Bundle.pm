@@ -142,10 +142,10 @@ sub check {
 }
 
 sub gen_port {
-  my ($objref, $is_first) = @_;
+  my ($objref, $is_debug, $is_first) = @_;
   my $ret = $is_first ? "" : ",";
 
-  $ret .= "\n  // $objref->{name} $objref->{debug}";
+  $ret .= "\n  // $objref->{name} $objref->{debug}" if ($is_debug);
   for my $port (@{$objref->{group}}) {
     $ret .= "\n  " . (DATA_SRC == $port->{direction} ? "input " : "output ");
     $ret .= "[@{[$port->{width} - 1]}:0] " if ($port->{width} > 1);
@@ -156,7 +156,7 @@ sub gen_port {
 }
 
 sub gen_assign {
-  my ($objref) = @_;
+  my ($objref, $is_debug) = @_;
   my $ret = "";
 
   for my $port (@{$objref->{group}}) {
@@ -167,7 +167,7 @@ sub gen_assign {
       $ret .= "$port->{wire} = $port->{name};\n";
     }
   }
-  $ret = "// $objref->{name} $objref->{debug}\n" . $ret if ($ret);
+  $ret = "// $objref->{name} $objref->{debug}\n" . $ret if ($is_debug && $ret);
 
   return $ret;
 }

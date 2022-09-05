@@ -6,41 +6,31 @@
  */
 
 module gen_module_comb (
-  // data_in &03_module_comp.t; @21
   input [31:0] din,
-  // data_out &03_module_comp.t; @24
   output [31:0] dout
 );
 
-// &03_module_comp.t; @31
 wire [31:0] tmp_data;
-// &03_module_comp.t; @32
 wire [31:0] data_845239;
-// &03_module_comp.t; @33
 wire [31:0] data_7808ca;
 
 
-// &03_module_comp.t; @31
 add1 u0_add1 (
   .din(data_5b9468),
   .dout(tmp_data)
 );
 
-// &03_module_comp.t; @32
 add1 adder (
   .din(tmp_data),
   .dout(data_845239)
 );
 
-// &03_module_comp.t; @33
 minus1 u0_minus1 (
   .din(data_845239),
   .dout(data_7808ca)
 );
 
-// data_in &03_module_comp.t; @21
 assign data_5b9468 = din;
-// data_out &03_module_comp.t; @24
 assign dout = data_7808ca;
 
 endmodule

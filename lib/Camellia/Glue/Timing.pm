@@ -79,10 +79,10 @@ sub check {
 }
 
 sub gen_port {
-  my ($objref, $is_first) = @_;
+  my ($objref, $is_debug, $is_first) = @_;
   my $ret = $is_first ? "" : ",";
 
-  $ret .= "\n  // $objref->{name} $objref->{debug}";
+  $ret .= "\n  // $objref->{name} $objref->{debug}" if ($is_debug);
   $ret .= "\n  input $objref->{clock}->{name},";
   $ret .= "\n  input $objref->{reset}->{name}";
 

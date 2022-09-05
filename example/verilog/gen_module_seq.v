@@ -3,27 +3,19 @@
  */
 
 module gen_module_seq (
-  // default &04_module_seq.t; @18
   input clk,
   input rst,
-  // fast &04_module_seq.t; @23
   input clk_fast,
   input rst_n,
-  //  &04_module_seq.t; @29
   input [31:0] din,
-  //  &04_module_seq.t; @32
   output [31:0] dout1,
-  //  &04_module_seq.t; @35
   output [31:0] dout2
 );
 
-// &04_module_seq.t; @43
 wire [31:0] data_845239;
-// &04_module_seq.t; @49
 wire [31:0] data_0c4f2d;
 
 
-// &04_module_seq.t; @43
 register u0_register (
   .clk(clk),
   .rst_n(~(rst)),
@@ -31,7 +23,6 @@ register u0_register (
   .q(data_845239)
 );
 
-// &04_module_seq.t; @49
 register u1_register (
   .clk(clk_fast),
   .rst_n(rst_n),
@@ -39,11 +30,8 @@ register u1_register (
   .q(data_0c4f2d)
 );
 
-//  &04_module_seq.t; @29
 assign data_5b9468 = din;
-//  &04_module_seq.t; @32
 assign dout1 = data_845239;
-//  &04_module_seq.t; @35
 assign dout2 = data_0c4f2d;
 
 endmodule

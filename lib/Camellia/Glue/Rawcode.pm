@@ -11,8 +11,12 @@ sub new {
 }
 
 sub gen_code {
-  my ($objref) = @_;
-  return "\n// $objref->{debug}\n$objref->{code}"
+  my ($objref, $is_debug) = @_;
+  my $ret = "";
+
+  $ret .= "\n// $objref->{debug}" if ($is_debug);
+  $ret .= "\n$objref->{code}";
+  return $ret;
 }
 
 1;

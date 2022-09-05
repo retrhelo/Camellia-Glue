@@ -27,6 +27,7 @@ sub init_top {
   $meta = $info // {};
   $meta->{top} = $top;
   $meta->{file} = $file;
+  $meta->{debug} //= 0;
   $meta->{elem_array} = [];
 
   # By default, always assign a fixed seed
@@ -55,18 +56,18 @@ EOL_HEAD
       # Connection check
       $elem->check();
 
-      $port_buf .= $elem->gen_port(0 == ("" cmp $port_buf));
-      $assign_buf .= $elem->gen_assign();
+      $port_buf .= $elem->gen_port($meta->{debug}, 0 == ("" cmp $port_buf));
+      $assign_buf .= $elem->gen_assign($meta->{debug});
     } elsif ($elem->isa("Camellia::Glue::Rawcode")) {
-      $elem_buf .= $elem->gen_code();
+      $elem_buf .= $elem->gen_code($meta->{debug});
     } elsif ($elem->isa("Camellia::Glue::Inst")) {
       # Connection check
       $elem->check();
 
-      $wire_buf .= $elem->gen_wire();
-      $elem_buf .= $elem->gen_inst();
+      $wire_buf .= $elem->gen_wire($meta->{debug});
+      $elem_buf .= $elem->gen_inst($meta->{debug});
     } elsif ($elem->isa("Camellia::Glue::Timing")) {
-      $port_buf .= $elem->gen_port(0 == ("" cmp $port_buf));
+      $port_buf .= $elem->gen_port($meta->{debug}, 0 == ("" cmp $port_buf));
     } else {
       my ($package, $filename, $line) = caller;
       die "&$filename \@$line: Unknown type signed";
