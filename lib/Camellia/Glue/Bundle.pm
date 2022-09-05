@@ -77,7 +77,6 @@ sub connect {
     $prefix = (defined $args->{prefix}) ? "$args->{prefix}_" : "";
     $suffix = (defined $args->{suffix}) ? "_$args->{suffix}" : "";
   } else {
-    # TODO: generate random pre/suffix
     $prefix = "";
     $suffix = "_" . __gen_random;
   }
