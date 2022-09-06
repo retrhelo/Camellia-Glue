@@ -29,7 +29,7 @@ my $fast_timing = create_timing "fast", {
 };
 
 my $data_in = create_bundle undef, [
-  {name => "din",, direction => "input", width => 32, tag => "data"}
+  {name => "din", direction => "input", width => 32, tag => "data"}
 ];
 my $data_add = create_bundle "after_add1", [
   {name => "dout_add", direction => "output", width => 32, tag => "data"}
