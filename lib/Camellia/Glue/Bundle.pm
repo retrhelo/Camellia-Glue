@@ -58,27 +58,33 @@ sub new {
   }, $class;
 }
 
-my $hash = {};
-sub __gen_random {
-  my $rand;
-  do {
-    $rand = int(rand(0xffffff));
-  } until (!(defined $hash->{"$rand"}));
-
-  $hash->{"$rand"} = 1;
-  return sprintf "%06x", $rand;
-}
-
 sub connect {
   my ($obj, $dst_obj, $args) = @_;
+  my ($package, $filename, $line) = caller;
 
   my ($prefix, $suffix);
   if (defined $args) {
     $prefix = (defined $args->{prefix}) ? "$args->{prefix}_" : "";
     $suffix = (defined $args->{suffix}) ? "_$args->{suffix}" : "";
   } else {
+    # If neither prefix nor suffix is intentionally assigned, Bundle uses both
+    # the source and destination bundles' name, along with the line number
+    # where `connect` is called, to construct a suffix.
+    #
+    # Technically, there's very little chance that in a SoC design that two
+    # wires get the same suffix and name, when used like this:
+    #
+    # ```perl
+    # # $dst1 and $dst2 have the same name and belong to the same bundle class!
+    # $source_bundle->connect($dst1)->connect($dst2);
+    # ```
+    #
+    # Camellia-Glue is not going take care of such condition, since it should
+    # be really rare to happen. As for the programmer, in order to avoiding
+    # running into such a naming conflict, the programmer should avoid putting
+    # multiple `connect` at the same line.
     $prefix = "";
-    $suffix = "_" . __gen_random;
+    $suffix = "_$obj->{name}_$dst_obj->{name}_$line";
   }
 
   for my $src (@{$obj->{group}}) {

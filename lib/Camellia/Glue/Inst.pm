@@ -44,8 +44,6 @@ sub new {
 
   my $bundle_array = [];
   for my $bundle (@{$config->{bundle}}) {
-    defined $bundle->{name} or die "$debug: Bundle name not defined";
-
     my $group = [];
 
     for my $port (@{$bundle->{group}}) {

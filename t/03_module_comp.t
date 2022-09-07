@@ -14,7 +14,8 @@ my $gen_file = "$gen_mod.v";
 
 init_top $gen_mod, $gen_file, {
   author => "Artyom Liu <artyomliu\@foxmail.com>",
-  license => "MIT"
+  license => "MIT",
+  debug => 1
 };
 
 # Add top-level ports
