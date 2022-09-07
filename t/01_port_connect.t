@@ -70,4 +70,6 @@ ok(defined @{$master->{group}}[0]->{wire});
 ok(0 == (@{$slave->{group}}[1]->{wire} cmp "m2s_port2"));
 ok(defined @{$slave->{group}}[1]->{wire});
 ok(!(defined @{$master->{group}}[2]->{wire}));
-ok(!(defined @{$master->{group}}[3]->{wire}));
+# NOTICE: In compatible with parameterized design, port width is not to be
+# checked when doing connection.
+ok(defined @{$master->{group}}[3]->{wire});

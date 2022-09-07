@@ -94,9 +94,6 @@ sub connect {
         if ($src->{direction} == $dst->{direction}) {
           warn "$obj->{name}::$src->{name} -> $dst_obj->{name}::$dst->{name}: "
               . "same direction";
-        } elsif ($src->{width} != $dst->{width}) {
-          warn "$obj->{name}::$src->{name} -> $dst_obj->{name}::$dst->{name}: "
-              . "unmatched width ($src->{width}, $dst->{width})";
         } else {
           my ($port_out, $port_in);
           if (DATA_SRC == $src->{direction}) {
