@@ -194,8 +194,6 @@ sub create_inst {
     }
   }
 
-  # TODO: Initialize parameters
-
   push @{$meta->{elem_array}}, $ret;
   return $ret;
 }
