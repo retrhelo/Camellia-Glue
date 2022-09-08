@@ -1,0 +1,27 @@
+{
+  "name": "register_param",
+  "param": [
+    {"name": "width", "value": "32"}
+  ],
+  "timing": [
+    {
+      "name": "default",
+      "clock": {"name": "clk"},
+      "reset": {"name": "rst_n", "edge": "neg"}
+    }
+  ],
+  "bundle": [
+    {
+      "name": "data_in",
+      "group": [
+        {"name": "d", "width": "{width}", "direction": "input", "tag": "data"}
+      ]
+    },
+    {
+      "name": "data_out",
+      "group": [
+        {"name": "q", "width": "{width}", "direction": "output", "tag": "data"}
+      ]
+    }
+  ]
+}

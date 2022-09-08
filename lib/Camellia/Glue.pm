@@ -109,6 +109,8 @@ sub enter_timing {
 # implementation, avoiding users using "Camellia::Glue::Bundle" directly.
 sub create_bundle {
   my ($name, $group) = @_;
+
+  # Preprocess of input arguments
   $name //= "bd";
 
   my ($package, $filename, $line) = caller;
@@ -159,7 +161,7 @@ sub create_raw {
 }
 
 sub create_inst {
-  my ($mod_name, $name, $con_bundle, $param) = @_;
+  my ($mod_name, $name, $con_bundle, $param_hash) = @_;
   my ($package, $filename, $line) = caller;
 
   my $config = $module->{$mod_name};
@@ -173,6 +175,7 @@ sub create_inst {
     mod_name => $mod_name,
     config => $config,
     timing => $meta->{timing},
+    param_hash => $param_hash,
     debug => "&" . basename($filename) . "; \@$line"
   });
 

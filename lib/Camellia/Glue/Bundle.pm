@@ -36,7 +36,8 @@ sub new {
           ("input" cmp $port->{direction}) &&
           ("output" cmp $port->{direction})
         );
-    defined $port->{width} or die "$args->{debug}: undefined width";
+    defined $port->{width} or !$port->{width}
+        or die "$args->{debug}: undefined width";
   }
 
   for my $port (@{$args->{group}}) {
@@ -150,7 +151,19 @@ sub gen_port {
   $ret .= "\n  // $objref->{name} $objref->{debug}" if ($is_debug);
   for my $port (@{$objref->{group}}) {
     $ret .= "\n  " . (DATA_SRC == $port->{direction} ? "input " : "output ");
-    $ret .= "[@{[$port->{width} - 1]}:0] " if ($port->{width} > 1);
+
+    # Calculate port's bit width
+    if ($port->{width} =~ m/[^a-zA-Z_]/) {
+      # If the port's width is composed by pure numeric, then perform
+      # calculation to get its Verilog width, which results in code more
+      # readable and reasonable.
+      my $calc_width = eval "$port->{width}-1";
+      $ret .= "[$calc_width:0] " if ($calc_width > 0);
+    } else {
+      # Otherwise generate directly
+      $ret .= "[($port->{width})-1:0] ";
+    }
+
     $ret .= $port->{name};
   }
 

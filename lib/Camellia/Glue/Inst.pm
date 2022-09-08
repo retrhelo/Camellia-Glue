@@ -4,6 +4,7 @@ package Camellia::Glue::Inst;
 
 use Camellia::Glue::Bundle;
 use Camellia::Glue::Timing;
+use Camellia::Glue::Param;
 
 use constant {
   DATA_SRC => 0x1,
@@ -17,9 +18,8 @@ sub new {
   my $mod_name = $args->{mod_name};     # Module's name
   my $config = $args->{config};         # Module's bundles (and parameters)
   my $default_timing = $args->{timing}; # Default timing domain
+  my $param_hash = $args->{param_hash}; # Parameter hash table
   my $debug = $args->{debug};           # Debug information
-
-  # TODO: support parameters
 
   # Deep copy all configurations from `config`
 
@@ -42,6 +42,22 @@ sub new {
     push @$timing_array, $tmp_timing;
   }
 
+  # Parameter
+  my $param = Camellia::Glue::Param->new({
+    param => $config->{param},
+    init => $param_hash
+  });
+
+  my $param_array = [];
+  for my $p (@{$config->{param}}) {
+    if (defined $param_hash->{$p->{name}}) {
+      push @$param_array, {
+        name => $p->{name},
+        value => $param_hash->{$p->{name}}
+      };
+    }
+  }
+
   my $bundle_array = [];
   for my $bundle (@{$config->{bundle}}) {
     my $group = [];
@@ -50,7 +66,7 @@ sub new {
       push @$group, {
         name => $port->{name},
         direction => $port->{direction},
-        width => $port->{width},
+        width => $param->map($port->{width}),
         tag => $port->{tag} // $port->{name}
       }
     }
@@ -68,6 +84,7 @@ sub new {
     mod_name => $mod_name,
     timing => $timing_array,
     bundle => $bundle_array,
+    param => $param_array,
     debug => $debug
   }, $class;
 }
@@ -122,7 +139,19 @@ sub gen_wire {
     for my $port (@{$bundle->{group}}) {
       if ($port->{gen}) {
         $ret .= "wire ";
-        $ret .= "[@{[$port->{width}-1]}:0] " if ($port->{width} > 1);
+
+        # Calculate port's bit width
+        if ($port->{width} =~ m/[^a-zA-z_]/) {
+          # If the port's width is composed by pure numeric, then perform
+          # calculation to get its Verilog width, which results in code more
+          # readable and reasonable.
+          my $calc_width = eval "$port->{width}-1";
+          $ret .= "[$calc_width:0] " if ($calc_width > 0);
+        } else {
+          # Otherwise generate directly
+          $ret .= "[($port->{width})-1:0] ";
+        }
+
         $ret .= "$port->{wire};\n";
       }
     }
@@ -134,15 +163,34 @@ sub gen_wire {
 sub gen_inst {
   my ($objref, $is_debug) = @_;
   my $ret = "";
-  my $is_first = 1;
+  my $is_first;
 
-  # TODO: parameter support
   $ret .= "\n// $objref->{debug}" if ($is_debug);
-  $ret .= "\n$objref->{mod_name} $objref->{name} (";
+  $ret .= "\n$objref->{mod_name} ";
+
+  # Parameter initialization
+  $is_first = 1;
+  for my $param (@{$objref->{param}}) {
+    if ($is_first) {
+      $ret .= "#(\n";
+      $is_first = 0;
+    } else {
+      $ret .= ",\n";
+    }
+    $ret .= "  .$param->{name}($param->{value})";
+  }
+
+  if (!$is_first) {
+    $ret .= "\n) ";
+    $is_first = 1;
+  }
+
+  $ret .= "$objref->{name} ";
+
   # Generate timing ports first
   for my $timing (@{$objref->{timing}}) {
     if ($is_first) {
-      $ret .= "\n";
+      $ret .= "(\n";
       $is_first = 0;
     } else {
       $ret .= ",\n";
@@ -155,7 +203,7 @@ sub gen_inst {
   for my $bundle (@{$objref->{bundle}}) {
     for my $port (@{$bundle->{group}}) {
       if ($is_first) {
-        $ret .= "\n";
+        $ret .= "(\n";
         $is_first = 0;
       } else {
         $ret .= ",\n";

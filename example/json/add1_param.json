@@ -1,0 +1,21 @@
+{
+  "name": "add1_param",
+  "param": [
+    {"name": "in_width", "value": "32"},
+    {"name": "out_width", "value": "{in_width}+1"}
+  ],
+  "bundle": [
+    {
+      "name": "data_in",
+      "group": [
+        {"name": "din", "width": "{in_width}", "direction": "input", "tag": "data"}
+      ]
+    },
+    {
+      "name": "data_out",
+      "group": [
+        {"name": "dout", "width": "{out_width}", "direction": "output", "tag": "data"}
+      ]
+    }
+  ]
+}
